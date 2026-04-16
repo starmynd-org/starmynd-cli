@@ -1,0 +1,30 @@
+{
+  "name": "@starmynd/cli",
+  "version": "0.1.0",
+  "description": "StarMynd CLI - Manage your StarMynd workspace from the terminal",
+  "type": "module",
+  "bin": {
+    "starmynd": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": ["starmynd", "cli", "ai", "workspace"],
+  "author": "StarMynd",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "commander": "^12.1.0",
+    "js-yaml": "^4.1.0",
+    "open": "^10.1.0",
+    "ora": "^8.0.1"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^20.14.0",
+    "typescript": "^5.5.0"
+  }
+}
