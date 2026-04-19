@@ -223,7 +223,7 @@ function getFilesToPush(targetPath: string): string[] {
   return [];
 }
 
-function writeLocalState(data: CliPullResponse): void {
+export function writeLocalState(data: CliPullResponse): void {
   // Group entities by type
   const byType = new Map<string, CliEntitySnapshot[]>();
   for (const entity of data.entities) {

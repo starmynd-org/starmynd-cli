@@ -272,43 +272,52 @@ export function registerKbCommands(program: Command): void {
   kb
     .command('list')
     .description('List nodes in a namespace')
-    .requiredOption('--namespace <id>', 'Namespace ID')
+    .requiredOption('--namespace <id>', 'Namespace ID or slug')
     .action(async (opts: { namespace: string }) => {
-      const spinner = ora('Fetching nodes...').start();
+      const spinner = ora('Fetching namespace info...').start();
 
       try {
-        // Use pull with knowledge filter to get nodes
-        const result = await api.pull({ only: ['knowledge'] });
+        // Resolve slug to UUID using the pull namespaces list
+        const pullResult = await api.pull({ only: ['knowledge'] });
         spinner.stop();
 
-        // Resolve slug to UUID if opts.namespace is not already a UUID
         const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(opts.namespace);
         let namespaceId = opts.namespace;
+        let namespaceName = opts.namespace;
         if (!isUuid) {
-          const match = result.namespaces.find(ns => ns.slug === opts.namespace);
+          const match = pullResult.namespaces.find(ns => ns.slug === opts.namespace);
           if (!match) {
-            console.log(chalk.yellow(`Namespace "${opts.namespace}" not found.`));
+            console.log(chalk.red(`Namespace "${opts.namespace}" not found.`));
+            console.log(chalk.dim('Run: starmynd kb list-namespaces to see available namespaces'));
             return;
           }
           namespaceId = match.id;
+          namespaceName = match.name;
         }
 
-        const nodes = result.entities.filter(e => {
-          return e.metadata?.namespace_id === namespaceId;
-        });
+        // Fetch all pages of nodes from the dedicated nodes endpoint
+        spinner.start('Fetching nodes...');
+        let page = 1;
+        const allNodes: api.KbNodeListItem[] = [];
+        let hasMore = true;
 
-        if (nodes.length === 0) {
-          console.log(chalk.yellow('No knowledge nodes found.'));
+        while (hasMore) {
+          const res = await api.kbListNodes(namespaceId, { page, limit: 100 });
+          allNodes.push(...res.data);
+          hasMore = res.hasMore;
+          page++;
+        }
+
+        spinner.stop();
+
+        if (allNodes.length === 0) {
+          console.log(chalk.yellow(`Namespace "${namespaceName}" has 0 nodes.`));
           return;
         }
 
-        console.log(chalk.bold(`Knowledge nodes (${nodes.length}):\n`));
-        for (const node of nodes) {
-          const status = node.status === 'active' ? chalk.green(node.status) : chalk.dim(node.status);
-          console.log(`  ${chalk.white(node.slug)} - ${node.title} [${status}]`);
-          if (node.tags.length > 0) {
-            console.log(`    tags: ${node.tags.join(', ')}`);
-          }
+        console.log(chalk.bold(`Knowledge nodes in "${namespaceName}" (${allNodes.length}):\n`));
+        for (const node of allNodes) {
+          console.log(`  ${chalk.white(node.id.slice(0, 8))} ${chalk.cyan(node.node_type.padEnd(12))} ${node.title}`);
         }
       } catch (err) {
         spinner.fail(`List failed: ${(err as Error).message}`);
