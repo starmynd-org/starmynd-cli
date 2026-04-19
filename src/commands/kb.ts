@@ -288,7 +288,7 @@ export function registerKbCommands(program: Command): void {
           const match = pullResult.namespaces.find(ns => ns.slug === opts.namespace);
           if (!match) {
             console.log(chalk.red(`Namespace "${opts.namespace}" not found.`));
-            console.log(chalk.dim('Run: starmynd kb list-namespaces to see available namespaces'));
+            console.log(chalk.dim('Run: starmynd list knowledge to see available namespaces'));
             return;
           }
           namespaceId = match.id;
