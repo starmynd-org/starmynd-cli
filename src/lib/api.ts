@@ -62,6 +62,47 @@ async function request<T>(
   return (json.data ?? json) as T;
 }
 
+// Like request<T> but returns the full JSON body without envelope unwrapping.
+// Use this for endpoints that return a top-level object (not wrapped in { data: ... }).
+async function requestRaw<T>(
+  method: string,
+  path: string,
+  body?: unknown,
+): Promise<T> {
+  const token = getAuthToken();
+  if (!token) {
+    throw new Error('Not authenticated. Run: starmynd auth login');
+  }
+
+  const endpoint = getApiEndpoint();
+  const url = `${endpoint}${path}`;
+
+  const headers: Record<string, string> = {
+    Authorization: `Bearer ${token}`,
+    'Content-Type': 'application/json',
+    'X-StarMynd-CLI': 'true',
+  };
+
+  const workspaceId = getWorkspaceId();
+  if (workspaceId) {
+    headers['X-Workspace-ID'] = workspaceId;
+  }
+
+  const res = await fetch(url, {
+    method,
+    headers,
+    body: body ? JSON.stringify(body) : undefined,
+    signal: AbortSignal.timeout(15_000),
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => 'Unknown error');
+    throw new ApiError(res.status, `API ${method} ${path} failed (${res.status}): ${text}`);
+  }
+
+  return res.json() as Promise<T>;
+}
+
 // ---------------------------------------------------------------------------
 // CLI API
 // ---------------------------------------------------------------------------
@@ -109,6 +150,43 @@ export async function kbExport(
   }
 
   return res.arrayBuffer();
+}
+
+export interface KbNodeListItem {
+  id: string;
+  node_type: string;
+  title: string;
+  content?: string;
+  tags?: string[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface KbNodeListResponse {
+  data: KbNodeListItem[];
+  total: number;
+  page: number;
+  limit: number;
+  hasMore: boolean;
+}
+
+// Fetch a page of knowledge nodes for a given namespace UUID.
+// Uses requestRaw because the endpoint returns a top-level pagination envelope,
+// not the { data: ... } wrapper that request<T> automatically unwraps.
+export async function kbListNodes(
+  namespaceId: string,
+  opts: { page?: number; limit?: number; node_type?: string; search?: string } = {},
+): Promise<KbNodeListResponse> {
+  const params = new URLSearchParams();
+  if (opts.page) params.set('page', String(opts.page));
+  if (opts.limit) params.set('limit', String(opts.limit));
+  if (opts.node_type) params.set('node_type', opts.node_type);
+  if (opts.search) params.set('search', opts.search);
+  const qs = params.toString() ? `?${params.toString()}` : '';
+  return requestRaw<KbNodeListResponse>(
+    'GET',
+    `/api/knowledge/namespaces/${encodeURIComponent(namespaceId)}/nodes${qs}`,
+  );
 }
 
 export async function kbRenderComponent(

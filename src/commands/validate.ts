@@ -8,6 +8,7 @@ import * as api from '../lib/api.js';
 import { parseEntityFile, scanDirectory } from '../lib/files.js';
 import { validateEntities } from '../lib/validation.js';
 import { showWelcomeScreen } from '../lib/welcome.js';
+import { writeLocalState } from './sync.js';
 
 export function registerValidateCommands(program: Command): void {
   // -----------------------------------------------------------------------
@@ -160,8 +161,17 @@ export function registerInitCommand(program: Command): void {
     .option('--slug <slug>', 'Workspace slug')
     .option('--api-key <key>', 'API key')
     .option('--endpoint <url>', 'API endpoint', 'https://app.starmynd.com')
-    .action(async (opts: { slug?: string; endpoint: string; apiKey?: string }) => {
+    .option('--force', 'Overwrite existing .starmynd/ configuration')
+    .action(async (opts: { slug?: string; endpoint: string; apiKey?: string; force?: boolean }) => {
       console.log(chalk.bold('\nStarMynd Workspace Setup\n'));
+
+      // D-002: Bail if already initialized (unless --force is passed)
+      const existingConfig = path.join(process.cwd(), '.starmynd', 'config.yaml');
+      if (fs.existsSync(existingConfig) && !opts.force) {
+        console.log(chalk.yellow('This directory is already a StarMynd workspace.'));
+        console.log(chalk.dim('  Run `starmynd pull` to refresh, or `starmynd init --force` to overwrite.'));
+        process.exit(1);
+      }
 
       let slug = opts.slug;
       let apiKey = opts.apiKey;
@@ -225,7 +235,9 @@ export function registerInitCommand(program: Command): void {
         } else {
           const { getAuthToken: existingToken } = await import('../lib/config.js');
           if (!existingToken()) {
-            spinner.info('No API key provided. Run: starmynd auth login');
+            // D-003: Exit non-zero when not authenticated so the caller knows setup is incomplete
+            spinner.fail('You are not authenticated. Run `starmynd auth login` first.');
+            process.exit(1);
           }
           spinner.text = 'Connecting...';
         }
@@ -248,6 +260,7 @@ export function registerInitCommand(program: Command): void {
               last_pull: result.pulled_at,
             });
 
+            writeLocalState(result);
             spinner.succeed('Workspace initialized');
             await showWelcomeScreen(result);
           } catch {

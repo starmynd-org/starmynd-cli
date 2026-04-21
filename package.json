@@ -1,6 +1,6 @@
 {
   "name": "@starmynd/cli",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "StarMynd CLI - Manage your StarMynd workspace from the terminal",
   "type": "module",
   "bin": {
