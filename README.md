@@ -1,4 +1,4 @@
-# @starmynd/cli
+# @starmynd1/cli
 
 StarMynd CLI, manage your workspace from the terminal.
 
@@ -13,7 +13,7 @@ It talks to the same API as the web app. Authentication is per-workspace; switch
 ## Install
 
 ```bash
-npm i -g @starmynd/cli
+npm i -g @starmynd1/cli
 ```
 
 Node 18 or later is required (the CLI uses native `fetch` and the modern `AbortSignal.timeout` API).

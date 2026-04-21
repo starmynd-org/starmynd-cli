@@ -16,7 +16,7 @@ wall_clock_hard_min: 40
 
 ## Goal
 
-Ship a clean v0.1.2 public release with the SC-028 Gate 5 scanner-skip fix bundled in. `@starmynd/cli` has NOT yet been published to npm; this release adds the scanner-skip fix on top of merged v0.1.1 (SC-027) so there's a clean semver delta for the first public publish.
+Ship a clean v0.1.2 public release with the SC-028 Gate 5 scanner-skip fix bundled in. `@starmynd1/cli` has NOT yet been published to npm; this release adds the scanner-skip fix on top of merged v0.1.1 (SC-027) so there's a clean semver delta for the first public publish.
 
 ## Context
 

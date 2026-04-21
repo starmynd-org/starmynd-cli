@@ -1,6 +1,6 @@
 # SC-033 Pre-Publish Checklist
 
-> Swarm: sc033-bundled-release | Target: @starmynd/cli v0.1.2 | Date: 2026-04-20
+> Swarm: sc033-bundled-release | Target: @starmynd1/cli v0.1.2 | Date: 2026-04-20
 > Branch: `swarm/sc033-bundled-release` at `3f2f801` (6 commits ahead of master `29d1523`)
 > Worktree: `/home/andlwarn/repos/worktrees/sc033-bundled-release`
 
@@ -46,7 +46,7 @@
 
 - [ ] Sync this swarm folder to life-os hub at `Repos/swarms/swarms/completed/2026-04-20-sc033-bundled-release/` (orchestrator).
 - [ ] Merge `swarm/sc033-bundled-release` into `master` (orchestrator; do not let the swarm do this).
-- [ ] Decide on README content before first `npm publish`. Minimal acceptable: project description, install via `npm install -g @starmynd/cli`, and a pointer to the subcommand list from `starmynd --help`.
+- [ ] Decide on README content before first `npm publish`. Minimal acceptable: project description, install via `npm install -g @starmynd1/cli`, and a pointer to the subcommand list from `starmynd --help`.
 - [ ] Confirm Andrew is gating `npm publish`. Publish command intentionally not run in this swarm per brief.
 
 ---
