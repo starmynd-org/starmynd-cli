@@ -118,7 +118,7 @@ export async function showWelcomeScreen(pullData?: CliPullResponse): Promise<voi
     `${chalk.dim('API:      ')} ${apiVal}`,
   ];
 
-  const v = chalk.cyan('v0.1.0');
+  const v = chalk.cyan('v0.1.3');
   const dot = chalk.blueBright('●');
   const status = online ? chalk.greenBright('ready') : chalk.yellow('offline');
 
