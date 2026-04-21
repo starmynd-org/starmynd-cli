@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.1.3] - 2026-04-21
+
+### Fixed
+- `starmynd --version` and the welcome-screen version badge now report the correct version. Prior versions had hardcoded version strings in `src/index.ts` and `src/lib/welcome.ts` that drifted from `package.json`; 0.1.2 shipped reporting `0.1.1` via `--version`. Followup tracked: read version from `package.json` at runtime so future bumps only need one edit.
+
 ## [0.1.2] - 2026-04-20
 
 ### Fixed
