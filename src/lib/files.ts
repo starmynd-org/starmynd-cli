@@ -141,6 +141,18 @@ export function parseKbFile(filePath: string, namespaceId?: string): CliBulkUplo
 // Directory scanning
 // ---------------------------------------------------------------------------
 
+// Collection-scope files that are generated or structural, not entities.
+// Matched against the path relative to the scan root.
+// Fixes SC-028 Gate 5: fresh `starmynd init` + `validate .starmynd/` produced
+// 12 errors on these files because the scanner treated every yaml/md as a
+// candidate entity.
+export const COLLECTION_SKIP_PATHS: ReadonlySet<string> = new Set([
+  'GUIDE.md',
+  'config.yaml',
+  'governance/config.yaml',
+  'namespaces/_index.yaml',
+]);
+
 export function scanDirectory(dir: string, extensions?: string[]): string[] {
   const results: string[] = [];
   const exts = extensions || ['.yaml', '.yml', '.md', '.html', '.htm'];
@@ -152,6 +164,8 @@ export function scanDirectory(dir: string, extensions?: string[]): string[] {
       if (entry.isDirectory()) {
         if (!entry.name.startsWith('.')) walk(fullPath);
       } else if (exts.includes(path.extname(entry.name).toLowerCase())) {
+        const rel = path.relative(dir, fullPath).split(path.sep).join('/');
+        if (COLLECTION_SKIP_PATHS.has(rel)) continue;
         results.push(fullPath);
       }
     }
